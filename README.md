@@ -17,7 +17,7 @@ All releases and patch notes: [Releases](https://github.com/mattrav05/heyday-rel
 ## Community
 
 - Discord: **https://discord.gg/NahUHVruhs** (news, game listings, help, bug reports)
-- Wiki: items, sets, runewords, cube recipes, skills and boss loot - linked in the Discord #download channel
+- Wiki: **https://mattrav05.github.io/heyday-releases/wiki/** (items, sets, runewords, cube recipes, skills, boss loot)
 
 ## Credits
 
