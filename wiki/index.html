@@ -138,6 +138,54 @@ main { max-width: 1240px; margin: 0 auto; padding: 12px 16px 48px; }
 .ctable td:first-child { white-space: nowrap; color: var(--accent); }
 .tscroll { overflow-x: auto; }
 
+/* league: ladder table, live cards, character sheet (gear laid out like the game's equipment screen) */
+.lnote { color: var(--dim); font-size: 13px; margin: 0 0 10px; max-width: 90ch; }
+.ltable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.ltable th { text-align: left; font-weight: normal; color: var(--gold); border-bottom: 1px solid var(--gold); padding: 6px 8px; white-space: nowrap; }
+.ltable td { border-bottom: 1px solid var(--line); padding: 7px 8px; }
+.ltable tr.me td { background: var(--panel-2); }
+.ltable td.r { text-align: right; } .ltable th.r { text-align: right; }
+.ltable .rank { color: var(--dim); width: 3em; }
+.ltable a { color: var(--accent); text-decoration: none; font-family: var(--display); }
+.ltable a:hover { text-decoration: underline; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3fc43f; margin-left: 6px; box-shadow: 0 0 6px #3fc43f; vertical-align: 1px; }
+.dead { color: var(--red); font-size: 12px; margin-left: 6px; }
+.cls { color: var(--dim); }
+.lcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.lcard { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; }
+.lcard h3 { margin: 0; font: 17px var(--display); color: var(--accent); }
+.lcard .meta { color: var(--dim); font-size: 13px; margin: 2px 0 8px; }
+.lcard .meta b { color: var(--text); font-weight: normal; }
+.lstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 6px 0 8px; }
+.lstats div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px; padding: 5px 7px; min-width: 0; }
+.lstats b { display: block; font: 16px var(--display); color: var(--text); font-weight: normal; overflow-wrap: anywhere; }
+.lstats span { font-size: 11px; color: var(--dim); }
+.pending { display: inline-block; font-size: 11px; color: var(--gold); border: 1px solid var(--line-2); border-radius: 3px; padding: 0 6px; }
+.lbtn { background: var(--panel-2); border: 1px solid var(--line-2); color: var(--gold); border-radius: 3px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
+.sheet { background: var(--panel); border: 1px solid var(--gold); border-radius: 4px; padding: 14px; margin: 0 0 16px; }
+.sheet h2 { margin: 0; font: 22px var(--display); color: var(--accent); }
+.sheet .meta { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
+.sheet .close { float: right; }
+.attrs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.attrs div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; font-size: 13px; color: var(--dim); }
+.attrs b { color: var(--text); font-weight: normal; margin-left: 4px; }
+.doll { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "rhand head neck" "rhand torso lhand" "rring belt lring" "hands . feet"; }
+.slot { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; min-width: 0; text-align: center; }
+.slot .sl { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.slot .nm { font: 15px var(--display); overflow-wrap: anywhere; }
+.slot .bs { font-size: 12px; color: var(--dim); }
+.slot ul { list-style: none; margin: 5px 0 0; padding: 0; }
+.slot li { color: var(--magic); font-size: 13px; overflow-wrap: anywhere; }
+.slot .empty-slot { color: var(--dim); font-size: 12px; padding: 6px 0; }
+.q-unique { color: var(--unique); } .q-set { color: var(--set); } .q-runeword { color: var(--rune); }
+.q-rare { color: #e7d16a; } .q-magic { color: var(--magic); } .q-crafted { color: #d9842b; }
+.q-normal, .q-superior, .q-low { color: var(--text); }
+:root[data-theme="light"] .q-rare { color: #8a6d00; }
+.mercg { margin-top: 12px; } .mercg h4 { margin: 0 0 6px; color: var(--gold); font: 15px var(--display); }
+.mercg .row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+@media (max-width: 760px) { .doll { grid-template-columns: 1fr; grid-template-areas: "head" "neck" "torso" "rhand" "lhand" "hands" "belt" "feet" "rring" "lring"; }
+  .ltable .hide-s { display: none; } }
 .top { position: fixed; right: 16px; bottom: 16px; z-index: 9; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--gold);
   border-radius: 3px; padding: 6px 10px; cursor: pointer; display: none; }
 footer { text-align: center; color: var(--dim); font-size: 12px; padding: 0 16px 32px; }
@@ -171,7 +219,8 @@ const DATA = {"version": "1.1.14", "uniques": [{"name": "The Gnasher", "base": "
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const slug = t => String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const PAGE = 60;   // cards rendered per batch ("Show more")
-const TABS = [["guide", "Guide"], ["uniques", "Uniques"], ["sets", "Sets"], ["runewords", "Runewords"],
+const LEAGUE = "https://129-80-12-33.sslip.io";   // the league server (read-only public endpoints)
+const TABS = [["guide", "Guide"], ["live", "Live"], ["ladder", "Ladder"], ["uniques", "Uniques"], ["sets", "Sets"], ["runewords", "Runewords"],
               ["recipes", "Cube Recipes"], ["skills", "Skills"], ["loot", "Bosses & Loot"]];
 const CAT_ORDER = ["Weapons", "Armor", "Class items", "Jewelry", "Charms & jewels", "Other"];
 const CLASSES = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin", "Warlock"];
@@ -322,6 +371,37 @@ const VIEWS = {
                (c.intro ? `<p class="intro">${esc(c.intro)}</p>` : "") + body + "</section>";
       }).join("") + "</div></div>",
   },
+  live: {
+    items: () => (LG.live || []).filter(p => match((p.character + " " + p.player + " " + p.class + " " + p.area).toLowerCase(), words())),
+    toolbar: () => "",
+    empty: () => LG.err ? `<p class="empty">${esc(LG.err)}</p>` : LG.live === null ? `<p class="empty">Loading...</p>` :
+      `<p class="empty">Nobody is playing a league session right now. Check the <a href="#ladder">Ladder</a>.</p>`,
+    render: a => sheetHtml("live") + `<p class="lnote">League sessions in progress, refreshed every 20 seconds. Numbers here are <span class="pending">not judged yet</span> -
+      the ladder only counts a session once the league has checked it.</p><div class="lcards">` + a.map(p => `<article class="lcard">
+      <h3>${esc(p.character)}</h3><div class="meta">Level ${p.level} ${esc(p.class)}${p.hardcore ? " · Hardcore" : ""} · ${esc(p.player)} · <span class="pending">not judged yet</span>
+      ${p.area ? `<br>in <b>${esc(p.area)}</b>` : ""}</div>
+      <div class="lstats"><div><b>${p.minutes} min</b><span>session</span></div>
+      <div><b>${p.level_start === p.level ? p.level : p.level_start + " → " + p.level}</b><span>level</span></div>
+      <div><b>${short(p.kills)}</b><span>kills</span></div><div><b>${short(p.xp_gained)}</b><span>exp gained</span></div>
+      <div><b>${short(p.xp_per_hour)}</b><span>exp / hour</span></div><div><b>${p.uniques} / ${p.sets}</b><span>uniques / sets</span></div></div>
+      <button type="button" class="lbtn" data-sheet="${esc(p.character)}">Gear</button> <span class="lnote">updated ${ago(p.updated)}</span></article>`).join("") + "</div>",
+  },
+  ladder: {
+    items: () => (LG.ladder || []).filter(c => (st.p.mode === "hc" ? c.hardcore : !c.hardcore) && (!st.p.cls || c.class === st.p.cls) &&
+      match((c.character + " " + c.player + " " + c.class).toLowerCase(), words())),
+    toolbar: () => chips("cls", [["", "All classes"], ...CLASSES]) + select("mode", "", [["", "Softcore"], ["hc", "Hardcore"]]),
+    empty: () => LG.err ? `<p class="empty">${esc(LG.err)}</p>` : LG.ladder === null ? `<p class="empty">Loading...</p>` : `<p class="empty">No characters here yet.</p>`,
+    render: a => {
+      const online = new Set((LG.live || []).map(p => p.character));
+      return sheetHtml("ladder") + `<p class="lnote">Ranked by experience. Every character counts as of its last session the league judged clean -
+        a rollback moves it back, and progress still being checked isn't counted yet. <span class="dot"></span> playing now.</p>
+        <div class="tscroll"><table class="ltable"><tr><th>#</th><th>Character</th><th>Class</th><th class="r">Level</th><th class="r hide-s">Experience</th><th class="hide-s">Player</th></tr>` +
+        a.map((c, i) => `<tr${c.character === st.item ? ' class="me"' : ""}><td class="rank">${i + 1}</td>
+          <td><a href="#ladder/${encodeURIComponent(c.character)}" data-sheet="${esc(c.character)}">${esc(c.character)}</a>${online.has(c.character) ? '<span class="dot" title="playing now"></span>' : ""}${c.dead ? '<span class="dead">dead</span>' : ""}</td>
+          <td class="cls">${esc(c.class)}</td><td class="r">${c.level}</td><td class="r hide-s">${fmt(c.experience)}</td><td class="hide-s">${esc(c.player)}</td></tr>`).join("") +
+        "</table></div>";
+    },
+  },
   loot: {
     items: () => LOOT.filter(s => match(s._s, words())),
     toolbar: () => "",
@@ -359,6 +439,68 @@ function parseLoot(md) {
   });
 }
 
+
+// ---------------------------------------------------------------- league: Live and Ladder (fetched from the league server)
+const LG = { live: null, ladder: null, err: "", sheets: {}, timer: 0 };
+async function lfetch(path) {
+  const r = await fetch(LEAGUE + path, { cache: "no-store" });
+  if (!r.ok) throw new Error(r.status === 404 ? "not found" : "the league server answered " + r.status);
+  return r.json();
+}
+async function loadLeague(which) {
+  try {
+    if (which === "live") LG.live = (await lfetch("/public/live")).players;
+    else LG.ladder = (await lfetch("/public/ladder")).characters;
+    LG.err = "";
+  } catch (e) { LG.err = "The league server can't be reached right now (" + e.message + ")."; }
+  if (st.tab === which) render(true);
+}
+async function loadSheet(name, live) {
+  const k = name + (live ? "|live" : "");
+  if (LG.sheets[k] && Date.now() - LG.sheets[k].at < 30000) return;
+  LG.sheets[k] = { at: Date.now(), data: null };
+  try { LG.sheets[k].data = await lfetch("/public/character/" + encodeURIComponent(name) + (live ? "?live=true" : "")); }
+  catch (e) { LG.sheets[k].data = { error: e.message }; }
+  render(true);
+}
+function leagueTick() {   // keep the open tab fresh: live every 20 s, ladder every minute
+  clearInterval(LG.timer);
+  if (st.tab === "live") { loadLeague("live"); LG.timer = setInterval(() => !document.hidden && loadLeague("live"), 20000); }
+  else if (st.tab === "ladder") { loadLeague("ladder"); if (!LG.live) loadLeague("live");
+    LG.timer = setInterval(() => !document.hidden && loadLeague("ladder"), 60000); }
+}
+const fmt = n => Number(n || 0).toLocaleString();
+const short = n => { n = Number(n || 0); return n >= 1e9 ? (n / 1e9).toFixed(2) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? (n / 1e3).toFixed(1) + "k" : fmt(n); };
+const ago = t => { const s = Math.max(0, Math.round(Date.now() / 1000 - t)); return s < 60 ? s + "s ago" : Math.round(s / 60) + " min ago"; };
+const SLOT_AREA = { "head": "head", "neck": "neck", "torso": "torso", "right hand": "rhand", "left hand": "lhand", "right ring": "rring",
+                    "left ring": "lring", "belt": "belt", "feet": "feet", "hands": "hands" };
+const SLOT_LABEL = { head: "Helm", neck: "Amulet", torso: "Armor", rhand: "Weapon", lhand: "Shield / Off-hand", rring: "Ring", lring: "Ring",
+                     belt: "Belt", feet: "Boots", hands: "Gloves" };
+function itemBox(g, area) {
+  if (!g) return `<div class="slot" style="grid-area:${area}"><div class="sl">${SLOT_LABEL[area]}</div><div class="empty-slot">empty</div></div>`;
+  const extra = [g.defense ? `Defense ${g.defense}` : "", g.ethereal ? "Ethereal" : "", g.sockets ? `Sockets ${g.sockets}` : ""].filter(Boolean).join(" · ");
+  return `<div class="slot"${area ? ` style="grid-area:${area}"` : ""}><div class="sl">${esc(area ? SLOT_LABEL[area] : g.slot)}</div>
+    <div class="nm q-${esc(g.quality)}">${esc(g.name)}</div>${g.name !== g.base ? `<div class="bs">${esc(g.base)}</div>` : ""}
+    ${extra ? `<div class="bs">${esc(extra)}</div>` : ""}<ul>${g.lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul>
+    ${g.socketed && g.socketed.length ? `<div class="bs">Socketed: ${esc(g.socketed.join(", "))}</div>` : ""}</div>`;
+}
+function sheetHtml(tab) {
+  if (!st.item) return "";
+  const live = tab === "live", k = st.item + (live ? "|live" : "");
+  const rec = LG.sheets[k]; if (!rec) { loadSheet(st.item, live); return `<div class="sheet"><p class="lnote">Loading ${esc(st.item)}...</p></div>`; }
+  const c = rec.data; if (!c) return `<div class="sheet"><p class="lnote">Loading ${esc(st.item)}...</p></div>`;
+  if (c.error) return `<div class="sheet"><button type="button" class="lbtn close" data-close>Close</button><p class="lnote">${esc(st.item)}: ${esc(c.error)}</p></div>`;
+  const by = {}; c.gear.forEach(g => { const a = SLOT_AREA[g.slot]; if (a) by[a] = g; });
+  const a = c.attributes;
+  return `<div class="sheet" id="sheet"><button type="button" class="lbtn close" data-close>Close</button>
+    <h2>${esc(c.name)}</h2><div class="meta">Level ${c.level} ${esc(c.class)}${c.hardcore ? " · Hardcore" : ""} · ${esc(c.player)} ·
+    ${c.verified ? "as of the last session the league judged clean" : '<span class="pending">live - not judged yet</span>'}</div>
+    <div class="attrs"><div>Strength<b>${a.strength}</b></div><div>Dexterity<b>${a.dexterity}</b></div><div>Vitality<b>${a.vitality}</b></div>
+    <div>Energy<b>${a.energy}</b></div><div>Life<b>${fmt(c.life)}</b></div><div>Mana<b>${fmt(c.mana)}</b></div><div>Experience<b>${fmt(c.experience)}</b></div></div>
+    <div class="doll">${Object.keys(SLOT_LABEL).map(ar => itemBox(by[ar], ar)).join("")}</div>
+    ${c.merc && c.merc.length ? `<div class="mercg"><h4>Mercenary</h4><div class="row">${c.merc.map(g => itemBox(g, "")).join("")}</div></div>` : ""}</div>`;
+}
+
 // ---------------------------------------------------------------- render
 function hits(id) {   // results per tab for the search box (tab badges)
   const v = VIEWS[id];
@@ -386,7 +528,8 @@ function render(keepScroll) {
   const active = Object.entries(st.p).some(([k, val]) => val && k !== "sort" && !(st.tab === "skills" && k === "cls"));
   toolbar.innerHTML = v.toolbar() + (active ? `<button type="button" class="reset" id="reset">Clear filters</button>` : "") +
     `<span class="count">${total ? `${n} of ${total}` : n ? `${n} result${n === 1 ? "" : "s"}` : ""}</span>`;
-  if (v.render) view.innerHTML = items.length ? v.render(items) : `<p class="empty">Nothing matches. <button type="button" class="reset" id="reset2">Clear the search and filters</button></p>`;
+  if (v.render && !items.length && v.empty) view.innerHTML = sheetHtml(st.tab) + v.empty();
+  else if (v.render) view.innerHTML = items.length ? v.render(items) : `<p class="empty">Nothing matches. <button type="button" class="reset" id="reset2">Clear the search and filters</button></p>`;
   else {
     if (st.item) { const i = items.findIndex(x => x.id === st.item); if (i >= shown) shown = Math.ceil((i + 1) / PAGE) * PAGE; }
     view.innerHTML = items.length ? `<div class="grid">${items.slice(0, shown).map(v.card).join("")}</div>` +
@@ -399,7 +542,7 @@ function render(keepScroll) {
   }
 }
 function go(tab, keep) {
-  st = { tab, item: "", p: keep ? { q: st.p.q } : {} }; shown = PAGE; writeHash(false); render(); window.scrollTo(0, 0);
+  st = { tab, item: "", p: keep ? { q: st.p.q } : {} }; shown = PAGE; writeHash(false); render(); window.scrollTo(0, 0); leagueTick();
 }
 
 // ---------------------------------------------------------------- events
@@ -417,13 +560,17 @@ document.addEventListener("click", e => {
   if (c) { st.p[c.dataset.chip] = c.dataset.v; if (c.dataset.chip === "cat") st.p.type = ""; st.item = ""; shown = PAGE; writeHash(); render(); return; }
   if (e.target.id === "reset" || e.target.id === "reset2") { st.p = st.tab === "skills" ? { cls: st.p.cls } : {}; q.value = ""; st.item = ""; shown = PAGE; writeHash(); render(); return; }
   if (e.target.id === "more") { shown += PAGE; render(true); return; }
+  const sh = e.target.closest("[data-sheet]");
+  if (sh) { e.preventDefault(); st.item = sh.dataset.sheet; writeHash(); render(true);
+    requestAnimationFrame(() => document.getElementById("sheet")?.scrollIntoView({ behavior: "smooth", block: "start" })); return; }
+  if (e.target.closest("[data-close]")) { st.item = ""; writeHash(); render(true); return; }
   const a = e.target.closest("a[href^='#']");
   if (a && a.closest(".toc")) { e.preventDefault(); const id = a.getAttribute("href").split("/")[1];
     st.item = id; writeHash(); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }
 });
 let qT; q.addEventListener("input", () => { clearTimeout(qT); qT = setTimeout(() => { st.p.q = q.value.trim(); st.item = ""; shown = PAGE; writeHash(); render(true); }, 150); });
 document.addEventListener("keydown", e => { if (e.key === "/" && document.activeElement !== q && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); q.select(); } });
-window.addEventListener("hashchange", () => { readHash(); shown = PAGE; render(); });
+window.addEventListener("hashchange", () => { const was = st.tab; readHash(); shown = PAGE; render(); if (st.tab !== was) leagueTick(); });
 const topBtn = document.getElementById("top");
 window.addEventListener("scroll", () => { topBtn.style.display = scrollY > 900 ? "block" : "none"; }, { passive: true });
 topBtn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
@@ -433,7 +580,7 @@ document.getElementById("theme").onclick = () => {
   try { localStorage.setItem("heyday-wiki-theme", root.dataset.theme); } catch (e) {}
 };
 try { const t = localStorage.getItem("heyday-wiki-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
-readHash(); render();
+readHash(); render(); leagueTick();
 </script>
 </body>
 </html>
