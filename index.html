@@ -9,87 +9,14 @@
 <meta property="og:description" content="Maps, the 50-level Hell's Torment, the Rips, level 125, legacy realm items and a witnessed-drop league. Free; one launcher installs everything.">
 <meta property="og:image" content="https://mattrav05.github.io/heyday-releases/assets/rips.jpg">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://mattrav05.github.io/heyday-releases/">
+<link rel="canonical" href="https://mattrav05.github.io/heyday-releases/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0d0b09; --panel: #17130f; --panel-2: #1f1912; --line: #3a2f22;
-    --text: #e6dccb; --muted: #a89a84; --gold: #d4a64a; --gold-2: #f0c96a; --ember: #c2452d;
-    --radius: 10px;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Source Sans 3", system-ui, sans-serif; }
-  a { color: var(--gold-2); }
-  img { max-width: 100%; display: block; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-  h1, h2, h3 { font-family: Cinzel, Georgia, serif; font-weight: 700; letter-spacing: .02em; line-height: 1.25; }
-  h2 { font-size: 1.9rem; color: var(--gold); margin: 0 0 .4em; }
-  h3 { font-size: 1.1rem; color: var(--gold-2); margin: 0 0 .35em; }
-  section { padding: 64px 0; border-top: 1px solid var(--line); }
-  .lead { color: var(--muted); font-size: 1.1rem; max-width: 46em; }
-
-  nav { position: sticky; top: 0; z-index: 5; background: rgba(13,11,9,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
-  nav .wrap { display: flex; align-items: center; gap: 22px; height: 56px; overflow-x: auto; }
-  nav .brand { display: flex; align-items: center; gap: 8px; font-family: Cinzel, serif; color: var(--gold); text-decoration: none; font-weight: 700; white-space: nowrap; }
-  nav .brand img { width: 26px; height: 26px; }
-  nav a.link { color: var(--muted); text-decoration: none; font-size: .95rem; white-space: nowrap; }
-  nav a.link:hover { color: var(--text); }
-  nav .spacer { flex: 1; }
-
-  .hero { position: relative; padding: 0; border: 0; overflow: hidden; }
-  .hero .bg { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,11,9,.35), rgba(13,11,9,.85) 70%, var(--bg)), url(assets/rips.jpg) center/cover; filter: saturate(1.05); }
-  .hero .wrap { position: relative; padding: 96px 20px 80px; text-align: center; }
-  .hero .logo { width: min(640px, 92%); margin: 0 auto 18px; filter: drop-shadow(0 4px 18px rgba(0,0,0,.8)); }
-  .hero p.tag { font-size: 1.25rem; max-width: 40em; margin: 0 auto 28px; text-shadow: 0 2px 10px #000; }
-  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: var(--radius); font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--panel-2); }
-  .btn:hover { border-color: var(--gold); }
-  .btn.primary { background: linear-gradient(180deg, var(--gold-2), var(--gold)); color: #1a1205; border-color: var(--gold); }
-  .btn.primary:hover { filter: brightness(1.08); }
-  .meta { margin-top: 16px; color: var(--muted); font-size: .95rem; }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 28px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-  .card p { margin: 0; color: var(--muted); }
-  .num { font-family: Cinzel, serif; color: var(--ember); font-size: .85rem; letter-spacing: .1em; }
-
-  .feature { display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: center; margin-top: 32px; }
-  .feature.flip { grid-template-columns: 1fr 1.1fr; }
-  .feature.flip .shot { order: 2; }
-  .shot { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,.5); }
-  .feature ul { margin: .5em 0 0; padding-left: 1.1em; color: var(--muted); }
-  .feature li { margin: .25em 0; }
-
-  ol.steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 14px; margin-top: 26px; }
-  ol.steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px 18px 64px; position: relative; }
-  ol.steps li::before { content: counter(s); position: absolute; left: 18px; top: 16px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); border: 1px solid var(--gold); color: var(--gold-2); font-family: Cinzel, serif; font-weight: 700; }
-  ol.steps strong { color: var(--text); }
-  ol.steps p { margin: .2em 0 0; color: var(--muted); }
-  .note { margin-top: 18px; padding: 14px 18px; border-left: 3px solid var(--ember); background: var(--panel); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
-
-  details { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; margin-top: 10px; }
-  summary { cursor: pointer; font-weight: 600; color: var(--text); }
-  details p { color: var(--muted); margin: .6em 0 0; }
-
-  footer { border-top: 1px solid var(--line); padding: 36px 0 48px; color: var(--muted); font-size: .92rem; }
-  footer .links { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 14px; }
-
-  @media (max-width: 760px) {
-    body { font-size: 16px; }
-    section { padding: 48px 0; }
-    .feature, .feature.flip { grid-template-columns: 1fr; }
-    .feature.flip .shot { order: 0; }
-    .hero .wrap { padding: 64px 16px 56px; }
-    .wrap { padding: 0 16px; }
-    nav a.link.opt { display: none; }
-    nav .wrap { gap: 16px; }
-    nav .brand { margin-right: 4px; }
-  }
-</style>
+<link rel="stylesheet" href="assets/heyday.css?v=1.1.43">
 </head>
 <body>
 
@@ -110,7 +37,7 @@
 <header class="hero" id="top">
   <div class="bg" aria-hidden="true"></div>
   <div class="wrap">
-    <img class="logo" src="assets/logo.png" alt="Heyday">
+    <h1 style="margin:0"><img class="logo" src="assets/logo.png" alt="Heyday - a free Diablo II: Resurrected mod"></h1>
     <p class="tag">A free mod for <strong>Diablo II: Resurrected - Reign of the Warlock</strong> with a deep endgame: Maps, the 50-level Hell's Torment, the Rips, level 125, legacy realm items and a league where every drop is witnessed.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/mattrav05/heyday-releases/releases/latest/download/HeydayLauncher.exe">Download the launcher</a>
@@ -118,6 +45,7 @@
       <a class="btn" href="wiki/">Browse the wiki</a>
     </div>
     <p class="meta" id="release">Windows - offline and TCP/IP only - never touches Battle.net</p>
+    <!--NEWS--><div class="banner"><span class="num">WHAT'S NEW - 1.1.43: Running Hoardlings, smoother map bosses</span><p>Hoardlings run. They used to stand around after appearing - now they bolt from the moment they spawn and keep running, blinking away when you corner them. Same loot, same 40 seconds to catch one once you&#x27;ve hit it. <a href="https://github.com/mattrav05/heyday-releases/releases/latest">Patch notes</a></p></div><!--/NEWS-->   <!-- the newest patch note, filled in by tools/wiki/build_static.py -->
   </div>
 </header>
 
