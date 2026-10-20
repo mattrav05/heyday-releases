@@ -136,6 +136,7 @@
         <div class="attrs"><div>Strength<b>${a.strength ?? "-"}</b></div><div>Dexterity<b>${a.dexterity ?? "-"}</b></div><div>Vitality<b>${a.vitality ?? "-"}</b></div><div>Energy<b>${a.energy ?? "-"}</b></div>
         <div>Life<b>${fmt(c.life)}</b></div><div>Mana<b>${fmt(c.mana)}</b></div><div>Experience<b>${fmt(c.experience)}</b></div></div>
         <div class="doll">${Object.keys(LABEL).map(ar => box(by[ar], ar)).join("")}</div>
+        ${(c.gear || []).some(g => /swap/.test(g.slot)) ? `<div class="mercg"><h2>Weapon swap</h2><div class="row">${c.gear.filter(g => /swap/.test(g.slot)).map(g => box(g, "")).join("")}</div></div>` : ""}
         ${c.merc && c.merc.length ? `<div class="mercg"><h2>Mercenary</h2><div class="row">${c.merc.map(g => box(g, "")).join("")}</div></div>` : ""}`;
     };
     draw(); window.addEventListener("hashchange", draw);
