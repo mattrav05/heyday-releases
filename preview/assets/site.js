@@ -86,6 +86,8 @@
     let rows = [], live = new Set();
     try { const [a, b] = await Promise.all([get("/public/ladder"), get("/public/live").catch(() => ({ players: [] }))]); rows = a.characters; live = new Set((b.players || []).map(p => p.character)); }
     catch (e) { return down(lad); }
+    const ls = $("#league-stats");   // home: the league in numbers
+    if (ls) { const v = [rows.length, live.size, rows.filter(c => c.level >= 125).length]; $$("b", ls).forEach((b, i) => b.textContent = fmt(v[i])); }
     function draw() {
       const hc = mode && mode.value === "hc", w = (lq?.value || "").toLowerCase();
       let list = rows.filter(c => !!c.hardcore === !!hc && (!cls || !cls.value || c.class === cls.value) && (!w || (c.character + " " + c.player).toLowerCase().includes(w)));
