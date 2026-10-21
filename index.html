@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./assets/heyday.css?v=f0f09d50bf">
+<link rel="stylesheet" href="./assets/heyday.css?v=61caadfb84">
 </head>
 <body data-root="./">
 <header class="top">
@@ -39,8 +39,8 @@
   <div class="bg" aria-hidden="true"></div>
   <div class="wrap">
     <h1 style="margin:0"><img class="logo" src="assets/logo.png" alt="Heyday - a free Diablo II: Resurrected mod"></h1>
-    <p class="pitch">A free mod for <strong>Diablo II: Resurrected - Reign of the Warlock</strong> with a deep endgame: Maps, the 50-level Hell's Torment, the Rips, level 125, legacy realm items and a league where every drop is witnessed.</p>
-    <div class="cta"><a class="btn primary" href="https://github.com/mattrav05/heyday-releases/releases/latest/download/HeydayLauncher.exe">Download the launcher</a><a class="btn" href="https://discord.gg/NahUHVruhs">Join the Discord</a></div>
+    <p class="pitch">A free mod for <strong>Diablo II: Resurrected - Reign of the Warlock</strong> with a deep endgame - Maps, the 50-level Hell's Torment, the Rips, level 125, legacy realm items - and a league where every drop is witnessed and every character checked.</p>
+    <div class="cta"><a class="btn primary" href="https://github.com/mattrav05/heyday-releases/releases/latest/download/HeydayLauncher.exe">Download the launcher</a><a class="btn" href="#the-league">The league</a><a class="btn" href="https://discord.gg/NahUHVruhs">Join the Discord</a></div>
     <div class="live-pill" id="live-pill"><span class="dot"></span>Heyday 1.1.43 · <a class="ln" href="league/">league ladder</a></div>
   </div>
 </header>
@@ -48,6 +48,40 @@
   <a href="wiki/uniques/"><b>1,584</b><span>Uniques</span></a><a href="wiki/sets/"><b>110</b><span>Sets</span></a>
   <a href="wiki/runewords/"><b>209</b><span>Runewords</span></a><a href="wiki/cube/"><b>785</b><span>Cube recipes</span></a>
 </div></div>
+<section class="s jewel" id="the-league">
+  <div class="wrap">
+    <div class="label">The Heyday league</div>
+    <h2 class="big">Every drop witnessed. Every character checked.</h2>
+    <p class="lead">Mod leagues usually run on trust: you play offline, and nobody can tell a real Windforce from a spawned one. The Heyday league is built so the server knows. It sees every item fall as it happens and checks every save before it counts. What you find is real, and so is everyone else's.</p>
+
+    <div class="pillars">
+      <div class="pillar"><span class="num">WHAT IT IS</span><h3>A vault for your characters</h3><p>Sign in with Discord in the launcher and play league characters. They live in the league's vault, not on your PC: the launcher hands them to the game when you press Play and returns them when you close it. There's a softcore and a hardcore ladder.</p></div>
+      <div class="pillar"><span class="num">WHAT IT DOES</span><h3>A witness rides along</h3><p>A league plugin records every item that arrives in your game, with the monster and the drop it came from, plus your kills by area. Each line is signed, so the log can't be edited or trimmed. The server checks every save against it: levels, stats, skills, gold and every item's stats.</p></div>
+      <div class="pillar"><span class="num">WHAT'S AT STAKE</span><h3>Real consequences</h3><p>An impossible item or save is refused, and the vault keeps your last good copy. A session that fails the checks is rolled back on its own. Old copies can't be restored, so a hardcore death stays dead and a bad trade stays done. Cheating costs the Discord account behind it.</p></div>
+    </div>
+
+    <ol class="flow">
+      <li><b>Sign in</b><span>with Discord, in the launcher</span></li>
+      <li><b>Play</b><span>your vault characters, solo or together</span></li>
+      <li><b>Witnessed</b><span>every drop and kill, signed as it happens</span></li>
+      <li><b>Checked</b><span>the server judges the session</span></li>
+      <li><b>On the ladder</b><span>and your best finds in #finds</span></li>
+    </ol>
+
+    <div class="league-live">
+      <div class="lstats" id="league-stats">
+        <div><b>-</b><span>League characters</span></div><div><b>-</b><span>Playing now</span></div><div><b>-</b><span>At level 125</span></div>
+      </div>
+      <div id="ladder" data-limit="5"><div class="empty">Loading the ladder...</div></div>
+      <div class="cta" style="justify-content:flex-start;margin-top:18px">
+        <a class="btn primary" href="https://github.com/mattrav05/heyday-releases/releases/latest/download/HeydayLauncher.exe">Get the launcher and join</a>
+        <a class="btn" href="league/">Full ladder</a><a class="btn" href="league/live/">Who's playing</a><a class="btn" href="wiki/guide/the-league-how-it-stays-fair/">How it stays fair</a>
+      </div>
+    </div>
+    <p class="note">No game that runs on your own PC can be made hack-proof, and the league doesn't pretend otherwise. It's built so that cheating is hard, visible and reversible, and moderators review everything it flags.</p>
+  </div>
+</section>
+<section class="s" id="whats-new"><div class="wrap"><div class="news"><div class="label">What's new - 1.1.43: Running Hoardlings, smoother map bosses</div><p>Hoardlings run. They used to stand around after appearing - now they bolt from the moment they spawn and keep running, blinking away when you corner them. Same loot, same 40 seconds to catch one once you&#x27;ve hit it.</p><a class="btn sm" href="news/">All patch notes</a></div></div></section>
 <section class="s" id="endgame">
   <div class="wrap">
     <h2>The endgame</h2>
@@ -107,12 +141,6 @@
     </div>
   </div>
 </section>
-<section class="s" id="league"><div class="wrap split">
-  <div><div class="label">League</div><h2>The ladder</h2><p class="lead">Top of the league right now. Every session is checked before it counts.</p>
-    <div id="ladder" data-limit="5"><div class="empty">Loading the ladder...</div></div>
-    <p style="margin-top:14px"><a class="btn sm" href="league/">Full ladder</a> <a class="btn sm" href="league/live/">Playing now</a></p></div>
-  <div class="news"><div class="label">What's new - 1.1.43: Running Hoardlings, smoother map bosses</div><p>Hoardlings run. They used to stand around after appearing - now they bolt from the moment they spawn and keep running, blinking away when you corner them. Same loot, same 40 seconds to catch one once you&#x27;ve hit it.</p><a class="btn sm" href="news/">All patch notes</a></div>
-</div></section>
 <section class="s" id="modes">
   <div class="wrap">
     <h2>Two ways to play</h2>
@@ -120,7 +148,6 @@
       <div class="card"><h3>Single player</h3><p>Your own characters, played however you like. Play together over TCP/IP - one person hosts, friends join.</p></div>
       <div class="card"><h3>The league</h3><p>Sign in with Discord in the launcher. League characters live in a vault, every drop is witnessed as it happens, and notable finds are posted live in the Discord. Impossible items are refused; spawned items, dupes and rollbacks are flagged and undone.</p></div>
     </div>
-    <p class="note">No game that runs on your own PC can be made hack-proof. The league is built so that cheating is hard, visible and reversible - and costs the cheater their Discord account. <a href="wiki/">The wiki</a> explains how it stays fair.</p>
   </div>
 </section>
 <section class="s" id="download">
@@ -159,6 +186,6 @@
     <p>Heyday 1.1.43. Every number on this site is generated from the game data. Built on D2R Reimagined, with work from Talonrage, locbones, the D2RLoader team, RuffnecKk and SirCabby - see Credits on the home page. Diablo II: Resurrected is &copy; Blizzard Entertainment; Heyday is a free fan mod, not affiliated with or endorsed by Blizzard.</p>
   </div>
 </footer>
-<script src="./assets/site.js?v=f96d8688a2" defer></script>
+<script src="./assets/site.js?v=b34c40e3dc" defer></script>
 </body>
 </html>
