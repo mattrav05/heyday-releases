@@ -1,7 +1,11 @@
-<p align="center"><img src="logo.png" alt="Heyday" width="560"></p>
+<p align="center"><img src="logo.png" alt="Heyday - a free Diablo 2 Resurrected (D2R) mod" width="560"></p>
 
-**Heyday** is a free mod for **Diablo II: Resurrected - Reign of the Warlock**: a deep endgame with the 50-level Hell's Torment, the rips, Soul Summons
-followers, hundreds of new uniques, sets and runewords, and every class brought up to the same power.
+**Heyday** is a free **Diablo 2 Resurrected (D2R) mod** for **Diablo II: Resurrected - Reign of the Warlock**: a deep endgame with Maps,
+the 50-level Hell's Torment, the rips, level 125, Soul Summons followers, hundreds of new uniques, sets and runewords, and every class
+brought up to the same power. Play it single player, multiplayer with friends, or in the online league.
+
+**Website and wiki:** [mattrav05.github.io/heyday-releases](https://mattrav05.github.io/heyday-releases/) - every unique, set, runeword,
+cube recipe and skill, the ladder and the patch notes. **Discord:** [discord.gg/NahUHVruhs](https://discord.gg/NahUHVruhs)
 
 ## Download
 
