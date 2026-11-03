@@ -39,38 +39,99 @@
     document.addEventListener("keydown", e => { if (e.key === "/" && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); box.focus(); } });
   }
 
-  // ---- database: tooltip cards with filters (uniques, sets, runewords)
+  // ---- database: tooltip cards with filters (item finder, uniques, sets, runewords). Every control is optional - a page
+  // only has the ones its rows can use (tools/wiki/build_site.py write_db); the filter state lives in the URL hash.
   const db = $("#db");
   if (db) (async () => {
     const data = await (await fetch(db.dataset.src)).json();
-    const kind = db.dataset.kind, q = $("#f-q"), ty = $("#f-type"), cl = $("#f-class"), so = $("#f-sort"), hy = $("#f-heyday"), cnt = $("#f-count"), more = $("#f-more");
+    const kind = db.dataset.kind, cnt = $("#f-count"), more = $("#f-more"), panel = $("#f-panel"), advBtn = $("#f-adv"), active = $("#f-active");
+    const F = { q: $("#f-q"), qual: $("#f-qual"), slot: $("#f-slot"), type: $("#f-type"), class: $("#f-class"), sort: $("#f-sort"),
+                lmin: $("#f-lmin"), lmax: $("#f-lmax"), tier: $("#f-tier"), sock: $("#f-sock"), diff: $("#f-diff"), src: $("#f-src") };
+    const hy = $("#f-heyday"), tagBtns = $$("#f-tags .tag"), DIFF = ["Normal", "Nightmare", "Hell", "Endgame"];
+    const tagLabel = Object.fromEntries(tagBtns.map(b => [b.dataset.tag, b.textContent]));
+    const tags = new Set();
     let shown = 60;
-    const read = () => new URLSearchParams(location.hash.slice(1));
-    const p0 = read(); if (q && p0.get("q")) q.value = p0.get("q"); if (ty && p0.get("type")) ty.value = p0.get("type"); if (cl && p0.get("class")) cl.value = p0.get("class");
+    const list = v => Array.isArray(v) ? v : v ? [v] : [];
+    // read the hash: #q=..&slot=..&tags=mf,res
+    const p0 = new URLSearchParams(location.hash.slice(1));
+    for (const [k, el] of Object.entries(F)) if (el && p0.get(k) !== null) el.value = p0.get(k);
+    if (hy && p0.get("heyday")) hy.checked = true;
+    (p0.get("tags") || "").split(",").filter(t => tagLabel[t]).forEach(t => tags.add(t));
+    const advUsed = () => ["lmin", "lmax", "tier", "sock", "diff", "src"].some(k => F[k]?.value) || hy?.checked || tags.size;
+    const openPanel = on => { if (!panel) return; panel.hidden = !on; advBtn?.setAttribute("aria-expanded", on); advBtn?.classList.toggle("on", on); };
+    openPanel(!!advUsed());
+    advBtn?.addEventListener("click", () => openPanel(panel.hidden));
+    const qClass = x => ({ rw: "rw", set: "set", crafted: "crafted" })[x.q || (kind === "runewords" ? "rw" : kind === "sets" ? "set" : "unique")] || "unique";
+    const href = x => x.u ? `${ROOT}wiki/${x.u}` : `${esc(x.s)}/`;
     const card = x => {
       const top = (x.w || []).map(l => `<div class="w">${esc(l)}</div>`).join("");
       const rq = x.r ? `<div class="rq">Required Level: ${x.r}</div>` : "";
       const pr = (x.p || []).map(l => `<div class="p">${esc(l)}</div>`).join("");
       const pc = (x.pc || []).map(l => `<div class="pc">${esc(l)}</div>`).join("");
       const rn = x.rn ? `<div class="runes">${esc(x.rn)}</div>` : "";
-      return `<a class="tip q-${kind === "runewords" ? "rw" : kind === "sets" ? "set" : "unique"}" href="${esc(x.s)}/">${x.h ? '<span class="badge">Heyday</span>' : ""}
-        <div class="art">${icon(x.i)}</div><div class="nm">${esc(x.n)}</div><div class="bs">${esc(x.b)}</div>${rn}${top}${rq}${pr}${pc}</a>`;
+      const set = x.set ? `<div class="bs">${esc(x.set)}</div>` : "";
+      return `<a class="tip q-${qClass(x)}" href="${href(x)}">${x.h && x.q !== "crafted" ? '<span class="badge">Heyday</span>' : ""}
+        <div class="art">${icon(x.i)}</div><div class="nm">${esc(x.n)}</div><div class="bs">${esc(x.b)}</div>${set}${rn}${top}${rq}${pr}${pc}</a>`;
     };
+    const val = k => F[k] ? F[k].value : "";
+    function match(x, words) {
+      if (val("qual") && x.q !== val("qual")) return false;
+      if (val("slot") && !list(x.sl).includes(val("slot"))) return false;
+      if (val("type") && x.t !== val("type")) return false;
+      if (val("class") && x.k !== val("class")) return false;
+      const lmin = parseInt(val("lmin")), lmax = parseInt(val("lmax"));
+      if (!isNaN(lmin) && (x.r || 0) < lmin) return false;
+      if (!isNaN(lmax) && (x.r || 0) > lmax) return false;
+      if (val("tier") && !list(x.ti).includes(val("tier"))) return false;
+      if (val("sock") && String(x.so || "") !== val("sock")) return false;
+      if (val("diff") && (!x.dl || DIFF.indexOf(x.dl) > DIFF.indexOf(val("diff")))) return false;   // "Hell and up": drops by Hell
+      if (val("diff") === "Endgame" && x.dl !== "Endgame") return false;
+      if (val("src") && !list(x.src).includes(val("src"))) return false;
+      if (hy && hy.checked && !x.h) return false;
+      for (const t of tags) if (!list(x.g).includes(t)) return false;
+      return words.every(w => x.f.includes(w));
+    }
+    function chips() {   // what's filtering right now, each removable
+      const out = [];
+      const lab = k => F[k].selectedOptions ? F[k].selectedOptions[0].textContent : F[k].value;
+      for (const k of ["qual", "slot", "type", "class", "tier", "sock", "diff", "src"]) if (val(k)) out.push([k, lab(k)]);
+      if (val("lmin") || val("lmax")) out.push(["lvl", `Level ${val("lmin") || 0}-${val("lmax") || "any"}`]);
+      if (hy?.checked) out.push(["heyday", "Heyday only"]);
+      for (const t of tags) out.push(["tag:" + t, tagLabel[t]]);
+      active.innerHTML = out.length ? out.map(([k, l]) => `<button type="button" class="tag on" data-clear="${esc(k)}">${esc(l)} &times;</button>`).join("") +
+        `<button type="button" class="clear" data-clear="all">Clear all</button>` : "";
+    }
     function apply(reset) {
       if (reset) shown = 60;
-      const words = (q?.value || "").toLowerCase().split(/\s+/).filter(Boolean);
-      let list = data.filter(x => (!ty || !ty.value || x.t === ty.value) && (!cl || !cl.value || x.k === cl.value) && (!hy || !hy.checked || x.h) &&
-        words.every(w => x.f.includes(w)));
-      const s = so ? so.value : "level";
-      const lv = x => x.r || 999;   // no level requirement (quest items): last
-      list.sort(s === "name" ? (a, b) => a.n.localeCompare(b.n) : s === "level-desc" ? (a, b) => b.r - a.r || a.n.localeCompare(b.n) : (a, b) => lv(a) - lv(b) || a.n.localeCompare(b.n));
-      cnt.textContent = `${fmt(list.length)} ${list.length === 1 ? "item" : "items"}`;
-      db.innerHTML = list.length ? list.slice(0, shown).map(card).join("") : `<div class="empty">Nothing matches - try fewer filters.</div>`;
-      more.style.display = list.length > shown ? "" : "none";
-      const h = new URLSearchParams(); if (q?.value) h.set("q", q.value); if (ty?.value) h.set("type", ty.value); if (cl?.value) h.set("class", cl.value);
+      const words = val("q").toLowerCase().split(/\s+/).filter(Boolean);
+      const res = data.filter(x => match(x, words));
+      const s = val("sort") || "level", lv = x => x.r || 999;   // no level requirement (quest items, crafted): last
+      res.sort(s === "name" ? (a, b) => a.n.localeCompare(b.n) : s === "level-desc" ? (a, b) => (b.r || 0) - (a.r || 0) || a.n.localeCompare(b.n)
+             : s === "ilvl" ? (a, b) => (a.il || 999) - (b.il || 999) || a.n.localeCompare(b.n) : (a, b) => lv(a) - lv(b) || a.n.localeCompare(b.n));
+      cnt.textContent = `${fmt(res.length)} ${res.length === 1 ? "item" : "items"}`;
+      db.innerHTML = res.length ? res.slice(0, shown).map(card).join("") : `<div class="empty">Nothing matches - try fewer filters.</div>`;
+      more.style.display = res.length > shown ? "" : "none";
+      tagBtns.forEach(b => { const on = tags.has(b.dataset.tag); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+      if (active) chips();
+      const h = new URLSearchParams();
+      for (const k of Object.keys(F)) if (k !== "sort" && val(k)) h.set(k, val(k));
+      if (val("sort") && val("sort") !== "level") h.set("sort", val("sort"));
+      if (hy?.checked) h.set("heyday", "1");
+      if (tags.size) h.set("tags", [...tags].join(","));
       history.replaceState(null, "", h.toString() ? "#" + h : location.pathname);
     }
-    [q, ty, cl, so, hy].forEach(el => el && el.addEventListener(el === q ? "input" : "change", () => apply(true)));
+    for (const el of Object.values(F)) if (el) el.addEventListener(el.tagName === "INPUT" ? "input" : "change", () => apply(true));
+    hy?.addEventListener("change", () => apply(true));
+    tagBtns.forEach(b => b.addEventListener("click", () => { tags.has(b.dataset.tag) ? tags.delete(b.dataset.tag) : tags.add(b.dataset.tag); apply(true); }));
+    active?.addEventListener("click", e => {
+      const k = e.target.closest("[data-clear]")?.dataset.clear; if (!k) return;
+      if (k === "all") { for (const [n, el] of Object.entries(F)) if (el && n !== "sort") el.value = ""; tags.clear(); if (hy) hy.checked = false; }
+      else if (k === "lvl") { F.lmin.value = ""; F.lmax.value = ""; }
+      else if (k === "heyday") hy.checked = false;
+      else if (k.startsWith("tag:")) tags.delete(k.slice(4));
+      else F[k].value = "";
+      apply(true);
+    });
     more.addEventListener("click", () => { shown += 60; apply(false); });
     apply(true);
   })();
