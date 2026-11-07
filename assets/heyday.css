@@ -46,7 +46,16 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .mh { font: 600 11px var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--accent-2); padding: 6px 10px 4px; }
 .dd.open .menu { display: grid; }
 .dd.open .dd-b svg { transform: rotate(180deg); }
-@media (hover: hover) and (min-width: 901px) { .dd:hover .menu, .dd:focus-within .menu { display: grid; } }
+/* desktop (2026-11-06, the user: the League menu "opens to the left and i cant select underneath it"): a short menu sits
+   under its own entry; a menu opens only after the pointer rests on its entry a moment (passing over the bar opens
+   nothing) and closes a moment after it leaves (time to reach it); keyboard focus opens it, a mouse click doesn't pin it */
+.dd.narrow { position: relative; }
+.dd.narrow .menu { left: 0; top: 100%; }
+@media (hover: hover) and (min-width: 901px) {
+  .menu { display: grid; visibility: hidden; opacity: 0; transition: opacity .1s, visibility 0s linear .1s; }
+  .dd:hover .menu, .dd:has(:focus-visible) .menu, .dd.open .menu { visibility: visible; opacity: 1; transition: opacity .1s linear .18s, visibility 0s linear .18s; }
+  .dd.open .menu { transition: none; }
+}
 .nl.dl-m { display: none; }
 .skip { position: absolute; left: -999px; top: 8px; z-index: 50; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 8px; }
 .skip:focus { left: 8px; }
