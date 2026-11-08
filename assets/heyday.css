@@ -219,6 +219,7 @@ table.t tbody tr:hover td { background: var(--panel-2); }
 table.t td.rk { font: 700 15px var(--display); color: var(--unique); width: 46px; }
 table.t a.cn { font-weight: 600; }
 table.t a.cn:hover { color: var(--unique); }
+table.t b.pg { color: var(--unique); font-weight: 700; }
 .chip { display: inline-block; margin-left: 8px; font-size: 12px; border-radius: 999px; padding: 0 8px; border: 1px solid var(--line-2); color: var(--muted); vertical-align: 1px; }
 .chip.live { color: var(--ok); border-color: #2d6b3c; }
 .chip.dead { color: var(--req); border-color: #6b2d2d; }

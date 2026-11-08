@@ -177,9 +177,9 @@
       let list = rows.filter(c => !!c.hardcore === !!hc && (!cls || !cls.value || c.class === cls.value) && (!w || (c.character + " " + c.player).toLowerCase().includes(w)));
       if (cnt) cnt.textContent = `${list.length} characters`;
       if (limit) list = list.slice(0, limit);
-      lad.innerHTML = list.length ? `<div class="tw"><table class="t"><thead><tr><th>#</th><th>Character</th><th>Class</th><th>Level</th><th>Experience</th><th>Player</th></tr></thead><tbody>` +
+      lad.innerHTML = list.length ? `<div class="tw"><table class="t"><thead><tr><th>#</th><th>Character</th><th>Class</th><th>Level</th><th>Paragon</th><th>Experience</th><th>Player</th></tr></thead><tbody>` +
         list.map((c, i) => `<tr><td class="rk">${i + 1}</td><td><a class="cn" href="${charUrl(c.character)}">${esc(c.character)}</a>${live.has(c.character) ? '<span class="chip live">playing</span>' : ""}${c.dead ? '<span class="chip dead">dead</span>' : ""}</td>
-          <td>${esc(c.class)}</td><td>${c.level}</td><td class="muted">${fmt(c.experience)}</td><td class="muted">${esc(c.player)}</td></tr>`).join("") + `</tbody></table></div>`
+          <td>${esc(c.class)}</td><td>${c.level}</td><td>${c.paragon ? `<b class="pg">${fmt(c.paragon)}</b>` : `<span class="muted">-</span>`}</td><td class="muted">${fmt(c.experience)}</td><td class="muted">${esc(c.player)}</td></tr>`).join("") + `</tbody></table></div>`
         : `<div class="empty">No characters here yet.</div>`;
     }
     [mode, cls, lq].forEach(el => el && el.addEventListener(el === lq ? "input" : "change", draw));
@@ -246,7 +246,7 @@
       const by = {}; (c.gear || []).forEach(g => { const a = SLOT[g.slot]; if (a) by[a] = g; });
       const a = c.attributes || {};
       sheet.innerHTML = `<div class="sheet-head"><h1>${esc(c.name)}</h1>${c.verified ? '<span class="badge-ok">Checked by the league</span>' : '<span class="badge-wait">Live - not checked yet</span>'}</div>
-        <p class="lead">Level ${c.level} ${esc(c.class)}${c.hardcore ? " · Hardcore" : ""} · played by ${esc(c.player)}</p>
+        <p class="lead">Level ${c.level}${c.paragon ? ` · Paragon ${fmt(c.paragon)}` : ""} ${esc(c.class)}${c.hardcore ? " · Hardcore" : ""} · played by ${esc(c.player)}</p>
         <div class="attrs"><div>Strength<b>${a.strength ?? "-"}</b></div><div>Dexterity<b>${a.dexterity ?? "-"}</b></div><div>Vitality<b>${a.vitality ?? "-"}</b></div><div>Energy<b>${a.energy ?? "-"}</b></div>
         <div>Life<b>${fmt(c.life)}</b></div><div>Mana<b>${fmt(c.mana)}</b></div><div>Experience<b>${fmt(c.experience)}</b></div></div>
         <div class="doll">${Object.keys(LABEL).map(ar => box(by[ar], ar)).join("")}</div>
