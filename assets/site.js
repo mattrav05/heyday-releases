@@ -248,7 +248,7 @@
       const swap = by.rhand2 || by.lhand2;
       const tabs = side => swap ? `<div class="wtabs a-t${side}"><button class="on" data-w="1">I</button><button data-w="2">II</button></div>` : "";
       return `<div class="doll2" data-who="${who}">${tabs("r")}${tabs("l")}` +
-        ["head", "neck", "torso", "rhand", "lhand", "rring", "lring", "belt", "feet", "hands"].map(a => slotHtml(by[a], a, /hand/.test(a) ? " w1" : "")).join("") +
+        ["head", "neck", "torso", "rhand", "lhand", "rring", "lring", "belt", "feet", "hands"].map(a => slotHtml(by[a], a, /^[rl]hand$/.test(a) ? " w1" : "")).join("") +
         (swap ? slotHtml(by.rhand2, "rhand2", " w2") + slotHtml(by.lhand2, "lhand2", " w2") : "") + `</div>`; };
     const invHtml = inv => { if (!inv) return ""; const [w, h] = inv.grid || [10, 8];
       return `<div class="inv" style="--w:${w};--h:${h}">${inv.items.map(g => cell(g, "ch", `grid-column:${g.x + 1}/span ${g.w};grid-row:${g.y + 1}/span ${g.h}`)).join("")}</div>`; };
@@ -277,39 +277,66 @@
         <div class="attrs"><div>Strength<b>${a.strength ?? "-"}</b></div><div>Dexterity<b>${a.dexterity ?? "-"}</b></div><div>Vitality<b>${a.vitality ?? "-"}</b></div><div>Energy<b>${a.energy ?? "-"}</b></div>
         <div>Life<b>${fmt(c.life)}</b></div><div>Mana<b>${fmt(c.mana)}</b></div><div>Experience<b>${fmt(c.experience)}</b></div></div>
         ${gear(c)}
-        ${build(c)}`;
-      wireGear();
+        ${paragon(c)}${build(c)}`;
+      wireGear(); drawLines(); requestAnimationFrame(drawLines);
+      $$(".sk img", sheet).forEach(i => i.addEventListener("load", drawLines, { once: true }));
     };
     // ---- skill build and charms (2026-11-13, a player: "Can you show people's skill builds / charms on the ladder"; the
     // user: "it would have to look clean and like the game"). Trees on the game's own 6 x 3 layout (skilldesc rows and
     // columns), charms with the gear above.
+    // skills: the badge is the skill's current level (hard points + the gear's +skills, which only reach a skill with a
+    // point in it); hover / tap shows the game's description, prerequisites and where the levels come from (2026-11-13,
+    // the user: "hovering over skills shows what it does"); prerequisite lines drawn between the icons, lit when both are used
+    let skillCards = [];
     const build = c => {
       const s = c.skills; if (!s || !s.trees) return "";
+      skillCards = [];
       const tree = t => {
         const pts = t.skills.reduce((n, k) => n + k.points, 0);
-        return `<div class="tree"><div class="tree-h"><span>${esc(t.name)}</span><b>${pts}</b></div><div class="tree-g">` +
-          t.skills.map(k => `<div class="sk${k.points ? " on" : ""}" style="grid-row:${k.row};grid-column:${k.col}" title="${esc(k.name)} - required level ${k.req}">
-            <span class="sk-i">${k.icon ? `<img src="${ROOT}assets/skills/${esc(k.icon)}.webp" alt="" loading="lazy" onerror="this.remove()">` : ""}<span class="sk-p">${k.points}</span></span><span class="sk-n">${esc(k.name)}</span></div>`).join("") + `</div></div>`;
+        return `<div class="tree"><div class="tree-h"><span>${esc(t.name)}</span><b>${pts}</b></div><div class="tree-g"><svg class="sk-lines" aria-hidden="true"></svg>` +
+          t.skills.map(k => { const i = skillCards.push(k) - 1, lvl = k.points + (k.plus || 0);
+            return `<button class="sk${k.points ? " on" : ""}" data-s="${i}" data-name="${esc(k.name)}" data-reqs="${esc((k.reqs || []).join("|"))}" style="grid-row:${k.row};grid-column:${k.col}" aria-label="${esc(k.name)}, level ${lvl}">
+            <span class="sk-i">${k.icon ? `<img src="${ROOT}assets/skills/${esc(k.icon)}.webp" alt="" loading="lazy" onerror="this.remove()">` : ""}<span class="sk-p">${lvl}</span></span><span class="sk-n">${esc(k.name)}</span></button>`; }).join("") + `</div></div>`;
       };
       const other = (s.other || []).length ? `<p class="build-note">Also: ${s.other.map(k => `${esc(k.name)} <b>${k.points}</b>`).join(", ")}</p>` : "";
       return `<div class="mercg"><h2>Skills</h2><p class="build-note">${fmt(s.spent)} points spent${s.unspent ? ` · ${fmt(s.unspent)} unspent` : ""} ·
-        points the player put in (+skills from gear not counted)</p><div class="trees">${s.trees.map(tree).join("")}</div>${other}</div>`;
+        the number is the skill's level with the gear's +skills - hover or tap a skill for more</p><div class="trees">${s.trees.map(tree).join("")}</div>${other}</div>`;
     };
+    const skillTip = k => { const lvl = k.points + (k.plus || 0);
+      return `<div class="nm">${esc(k.name)}</div>${k.desc ? `<div class="sd">${esc(k.desc)}</div>` : ""}
+        <div class="w">${k.points ? `Current level ${lvl}` : "No points"}</div>${k.points ? `<div class="bs">${k.points} hard point${k.points === 1 ? "" : "s"}${k.plus ? ` + ${k.plus} from gear and charms` : ""}</div>` : ""}
+        <div class="ql">Required level ${k.req}${(k.reqs || []).length ? ` · needs ${esc(k.reqs.join(", "))}` : ""}</div>`; };
+    const drawLines = () => $$(".tree-g", sheet).forEach(g => {
+      const svg = $(".sk-lines", g); if (!svg) return;
+      const box = g.getBoundingClientRect(), at = {};
+      $$(".sk", g).forEach(b => { const r = $(".sk-i", b).getBoundingClientRect();
+        at[b.dataset.name] = { x: r.left + r.width / 2 - box.left, y: r.top + r.height / 2 - box.top, on: b.classList.contains("on") }; });
+      svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+      svg.innerHTML = $$(".sk", g).flatMap(b => (b.dataset.reqs ? b.dataset.reqs.split("|") : []).filter(n => at[n]).map(n => {
+        const p = at[n], q = at[b.dataset.name];
+        return `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" class="${p.on && q.on ? "on" : ""}"/>`; })).join(""); });
+    const paragon = c => { const b = c.paragon_bar; if (!b) return "";
+      const pct = b.need ? Math.min(100, b.into / b.need * 100) : 0;
+      return `<div class="mercg"><h2>Paragon</h2><div class="pgn"><div class="pgn-l"><span>Paragon level</span><b>${fmt(b.level)}</b></div>
+        <div class="pgn-l"><span>Points earned</span><b>${fmt(b.level)}</b></div><div class="pgn-l"><span>Paragon experience</span><b>${fmt(c.paragon_exp)}</b></div>
+        <div class="pgn-bar"><div class="pgn-t"><span>Next level</span><span>${fmt(b.into)} / ${fmt(b.need)}</span></div><div class="pgn-track"><i style="width:${pct.toFixed(1)}%"></i></div></div></div></div>`; };
     const tipHtml = g => { const meta = [g.defense ? `Defense: ${fmt(g.defense)}` : "", g.quantity ? `Quantity: ${g.quantity}` : ""].filter(Boolean);
       return `<div class="nm">${esc(g.name)}</div>${g.name !== g.base ? `<div class="bs">${esc(g.base)}</div>` : ""}${meta.map(m => `<div class="w">${esc(m)}</div>`).join("")}
         <ul>${(g.lines || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul>${g.ethereal || g.sockets ? `<div class="p2">${[g.ethereal ? "Ethereal (Cannot be Repaired)" : "", g.sockets ? `Socketed (${(g.socketed || []).length}/${g.sockets})` : ""].filter(Boolean).join(", ")}</div>` : ""}
-        ${g.socketed && g.socketed.length ? `<div class="sk2">${g.socketed.map(esc).join(" · ")}</div>` : ""}<div class="ql">${esc(QN[g.quality] || g.quality || "")}${g.ilvl ? ` · item level ${g.ilvl}` : ""}</div>`; };
+        ${g.socketed && g.socketed.length ? `<div class="sk2">${g.socketed.map(x => typeof x === "string" ? `<div class="sx"><b>${esc(x)}</b></div>` :
+          `<div class="sx q-${esc(x.quality)}">${(f => f ? `<img src="${ROOT}assets/items/${esc(f)}" alt="">` : "")(artFor(x))}<div><b class="nm2">${esc(x.name)}</b>${(x.lines || []).map(l => `<span>${esc(l)}</span>`).join("")}</div></div>`).join("")}</div>` : ""}<div class="ql">${esc(QN[g.quality] || g.quality || "")}${g.ilvl ? ` · item level ${g.ilvl}` : ""}</div>`; };
     const wireGear = () => {
       const tip = $(".ctip", sheet); if (!tip) return;
-      const show = b => { const g = cards[+b.dataset.i]; if (!g) return; tip.className = `ctip q-${g.quality}`; tip.innerHTML = tipHtml(g); tip.hidden = false;
+      const show = b => { const k = b.dataset.s != null ? skillCards[+b.dataset.s] : null, g = k ? null : cards[+b.dataset.i]; if (!k && !g) return;
+        tip.className = k ? "ctip q-skill" : `ctip q-${g.quality}${(g.socketed || []).length > 1 ? " wide" : ""}`; tip.innerHTML = k ? skillTip(k) : tipHtml(g); tip.hidden = false;
         const r = b.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
         let x = r.right + 10, y = r.top + r.height / 2 - t.height / 2;
         if (x + t.width > vw - 8) x = r.left - t.width - 10;
         if (x < 8) { x = Math.max(8, Math.min(r.left + r.width / 2 - t.width / 2, vw - t.width - 8)); y = r.top - t.height - 8; if (y < 8) y = r.bottom + 8; }
         tip.style.left = x + "px"; tip.style.top = Math.max(8, Math.min(y, vh - t.height - 8)) + "px";
-        $$("[data-i].sel", sheet).forEach(x => x.classList.remove("sel")); b.classList.add("sel"); };
-      const hide = () => { tip.hidden = true; $$("[data-i].sel", sheet).forEach(x => x.classList.remove("sel")); };
-      $$("button[data-i]", sheet).forEach(b => { b.addEventListener("mouseenter", () => show(b)); b.addEventListener("focus", () => show(b));
+        $$("[data-i].sel, [data-s].sel", sheet).forEach(x => x.classList.remove("sel")); b.classList.add("sel"); };
+      const hide = () => { tip.hidden = true; $$("[data-i].sel, [data-s].sel", sheet).forEach(x => x.classList.remove("sel")); };
+      $$("button[data-i], button[data-s]", sheet).forEach(b => { b.addEventListener("mouseenter", () => show(b)); b.addEventListener("focus", () => show(b));
         b.addEventListener("click", e => { e.stopPropagation(); show(b); }); b.addEventListener("mouseleave", hide); b.addEventListener("blur", hide); });
       $$(".gtabs button", sheet).forEach(b => b.addEventListener("click", () => {
         $$(".gtabs button", sheet).forEach(x => x.classList.toggle("on", x === b));
@@ -321,8 +348,9 @@
       $$(".hl", sheet).forEach(b => b.addEventListener("click", () => { const on = b.getAttribute("aria-pressed") !== "true";
         b.setAttribute("aria-pressed", on); $(".gpanel", sheet).classList.toggle("hl-" + b.dataset.hl, on); }));
       if (!sheet.dataset.tipWired) { sheet.dataset.tipWired = 1;   // once per page: draw() runs again on every hash change
-        const off = () => { const t = $(".ctip", sheet); if (t) t.hidden = true; $$("[data-i].sel", sheet).forEach(x => x.classList.remove("sel")); };
-        document.addEventListener("click", off); window.addEventListener("scroll", off, { passive: true }); }
+        const off = () => { const t = $(".ctip", sheet); if (t) t.hidden = true; $$("[data-i].sel, [data-s].sel", sheet).forEach(x => x.classList.remove("sel")); };
+        document.addEventListener("click", off); window.addEventListener("scroll", off, { passive: true });
+        let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(drawLines, 120); }); }
       const paint = () => $$("button[data-i]", sheet).forEach(b => { const x = $(".ch-x", b), f = artFor(cards[+b.dataset.i]);
         if (f && x) x.outerHTML = `<img src="${ROOT}assets/items/${esc(f)}" alt="" draggable="false">`; });
       if (art) return;
