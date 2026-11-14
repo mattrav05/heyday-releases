@@ -251,7 +251,59 @@
         <div>Life<b>${fmt(c.life)}</b></div><div>Mana<b>${fmt(c.mana)}</b></div><div>Experience<b>${fmt(c.experience)}</b></div></div>
         <div class="doll">${Object.keys(LABEL).map(ar => box(by[ar], ar)).join("")}</div>
         ${(c.gear || []).some(g => /swap/.test(g.slot)) ? `<div class="mercg"><h2>Weapon swap</h2><div class="row">${c.gear.filter(g => /swap/.test(g.slot)).map(g => box(g, "")).join("")}</div></div>` : ""}
-        ${c.merc && c.merc.length ? `<div class="mercg"><h2>Mercenary</h2><div class="row">${c.merc.map(g => box(g, "")).join("")}</div></div>` : ""}`;
+        ${c.merc && c.merc.length ? `<div class="mercg"><h2>Mercenary</h2><div class="row">${c.merc.map(g => box(g, "")).join("")}</div></div>` : ""}
+        ${build(c)}${charms(c)}`;
+      wireCharms(c);
+    };
+    // ---- skill build and charms (2026-11-13, a player: "Can you show people's skill builds / charms on the ladder"; the
+    // user: "it would have to look clean and like the game"). Trees on the game's own 6 x 3 layout (skilldesc rows and
+    // columns), charms on the inventory grid where they sit, with the game's art (assets/items/charms.json) and tooltips.
+    const build = c => {
+      const s = c.skills; if (!s || !s.trees) return "";
+      const tree = t => {
+        const pts = t.skills.reduce((n, k) => n + k.points, 0);
+        return `<div class="tree"><div class="tree-h"><span>${esc(t.name)}</span><b>${pts}</b></div><div class="tree-g">` +
+          t.skills.map(k => `<div class="sk${k.points ? " on" : ""}" style="grid-row:${k.row};grid-column:${k.col}" title="${esc(k.name)} - required level ${k.req}">
+            <span class="sk-i">${k.icon ? `<img src="${ROOT}assets/skills/${esc(k.icon)}.webp" alt="" loading="lazy" onerror="this.remove()">` : ""}<span class="sk-p">${k.points}</span></span><span class="sk-n">${esc(k.name)}</span></div>`).join("") + `</div></div>`;
+      };
+      const other = (s.other || []).length ? `<p class="build-note">Also: ${s.other.map(k => `${esc(k.name)} <b>${k.points}</b>`).join(", ")}</p>` : "";
+      return `<div class="mercg"><h2>Skills</h2><p class="build-note">${fmt(s.spent)} points spent${s.unspent ? ` · ${fmt(s.unspent)} unspent` : ""} ·
+        points the player put in (+skills from gear not counted)</p><div class="trees">${s.trees.map(tree).join("")}</div>${other}</div>`;
+    };
+    let art = null;
+    const artFor = g => { if (!art) return ""; const u = art.uniques || {}, n = g.name || "";
+      return u[n] || u[n.replace(/\s*\(.*?\)\s*$/, "")] || (art.codes || {})[g.code] || ""; };
+    const charms = c => {
+      const ch = c.charms; if (!ch) return "";
+      const [w, h] = ch.grid || [10, 8];
+      if (!ch.items.length) return `<div class="mercg"><h2>Charms</h2><div class="empty">No charms in the inventory.</div></div>`;
+      const cells = ch.items.map((g, i) => { const f = artFor(g);
+        return `<button class="ch q-${esc(g.quality)}" data-i="${i}" style="grid-column:${g.x + 1}/span ${g.w};grid-row:${g.y + 1}/span ${g.h}" aria-label="${esc(g.name)}">${f ? `<img src="${ROOT}assets/items/${esc(f)}" alt="">` : `<span class="ch-x"></span>`}</button>`; }).join("");
+      return `<div class="mercg"><h2>Charms <small class="muted">${ch.items.length}</small></h2><div class="charms">
+        <div class="inv" style="--w:${w};--h:${h}">${cells}</div>
+        <div class="ctot"><div class="ctot-h">All charms together</div><ul>${(ch.totals || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul></div></div>
+        <div class="ctip" hidden></div></div>`;
+    };
+    const tipHtml = g => `<div class="nm">${esc(g.name)}</div>${g.name !== g.base ? `<div class="bs">${esc(g.base)}</div>` : ""}<ul>${(g.lines || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul>`;
+    const wireCharms = c => {
+      const tip = $(".ctip", sheet), inv = $(".inv", sheet); if (!tip || !inv) return;
+      const items = c.charms.items;
+      const show = b => { const g = items[+b.dataset.i]; tip.className = `ctip q-${g.quality}`; tip.innerHTML = tipHtml(g); tip.hidden = false;
+        const r = b.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+        let x = r.left + r.width / 2 - t.width / 2, y = r.top - t.height - 8;
+        if (y < 8) y = r.bottom + 8;
+        tip.style.left = Math.max(8, Math.min(x, vw - t.width - 8)) + "px"; tip.style.top = y + "px";
+        $$(".ch.sel", inv).forEach(x => x.classList.remove("sel")); b.classList.add("sel"); };
+      const hide = () => { tip.hidden = true; $$(".ch.sel", inv).forEach(x => x.classList.remove("sel")); };
+      $$(".ch", inv).forEach(b => { b.addEventListener("mouseenter", () => show(b)); b.addEventListener("focus", () => show(b));
+        b.addEventListener("click", e => { e.stopPropagation(); show(b); }); b.addEventListener("mouseleave", hide); b.addEventListener("blur", hide); });
+      if (!sheet.dataset.tipWired) { sheet.dataset.tipWired = 1;   // once per page: draw() runs again on every hash change
+        const off = () => { const t = $(".ctip", sheet); if (t) t.hidden = true; $$(".ch.sel", sheet).forEach(x => x.classList.remove("sel")); };
+        document.addEventListener("click", off); window.addEventListener("scroll", off, { passive: true }); }
+      if (!art) fetch(`${ROOT}assets/items/charms.json`).then(r => r.ok ? r.json() : null).then(a => {
+        if (!a) return; art = a;
+        $$(".ch", inv).forEach(b => { const f = artFor(items[+b.dataset.i]); if (f) b.innerHTML = `<img src="${ROOT}assets/items/${esc(f)}" alt="">`; });
+      }).catch(() => {});
     };
     draw(); window.addEventListener("hashchange", draw);
   }
