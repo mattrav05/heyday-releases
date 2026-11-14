@@ -228,14 +228,42 @@
 
   const sheet = $("#sheet");
   if (sheet) {
-    const SLOT = { "head": "head", "neck": "neck", "torso": "torso", "right hand": "rhand", "left hand": "lhand", "right ring": "rring", "left ring": "lring", "belt": "belt", "feet": "feet", "hands": "hands" };
-    const LABEL = { head: "Helm", neck: "Amulet", torso: "Armor", rhand: "Weapon", lhand: "Shield / Off-hand", rring: "Ring", lring: "Ring", belt: "Belt", feet: "Boots", hands: "Gloves" };
-    const box = (g, area) => {
-      if (!g) return `<div class="slot" style="grid-area:${area}"><div class="sl">${LABEL[area]}</div><div class="empty-slot">empty</div></div>`;
-      const extra = [g.defense ? `Defense ${g.defense}` : "", g.ethereal ? "Ethereal" : "", g.sockets ? `Sockets ${g.sockets}` : ""].filter(Boolean).join(" · ");
-      return `<div class="slot q-${esc(g.quality)}"${area ? ` style="grid-area:${area}"` : ""}><div class="sl">${esc(area ? LABEL[area] : g.slot)}</div>
-        <div class="nm">${esc(g.name)}</div>${g.name !== g.base ? `<div class="bs">${esc(g.base)}</div>` : ""}${extra ? `<div class="bs">${esc(extra)}</div>` : ""}
-        <ul>${(g.lines || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul>${g.socketed && g.socketed.length ? `<div class="bs">Socketed: ${esc(g.socketed.join(", "))}</div>` : ""}</div>`;
+    // ---- gear, drawn like the game's inventory panel (2026-11-13, the user: "shows the gear in the slot etc clean and
+    // compact but functional and you highlight the stuff"): each slot at its place on the game's paper doll, the
+    // inventory grid under it, item art (assets/items/art.json), quality-tinted cells and the game's tooltip on hover/tap.
+    const SLOT = { "head": "head", "neck": "neck", "torso": "torso", "right hand": "rhand", "left hand": "lhand", "right ring": "rring", "left ring": "lring",
+      "belt": "belt", "feet": "feet", "hands": "hands", "right hand (swap)": "rhand2", "left hand (swap)": "lhand2" };
+    const LABEL = { head: "Helm", neck: "Amulet", torso: "Armor", rhand: "Weapon", lhand: "Off-hand", rring: "Ring", lring: "Ring", belt: "Belt", feet: "Boots", hands: "Gloves" };
+    const QN = { unique: "Unique", set: "Set", runeword: "Runeword", rare: "Rare", crafted: "Crafted", magic: "Magic", superior: "Superior", normal: "Normal", low: "Low quality" };
+    let art = null, cards = [];
+    const artFor = g => { if (!art || !g) return ""; const u = art.uniques || {}, st = art.sets || {}, n = g.name || "", bare = n.replace(/\s*\(.*?\)\s*$/, "");
+      return (g.quality === "unique" && (u[n] || u[bare])) || (g.quality === "set" && st[n]) || (art.codes || {})[g.code] || ""; };
+    const pic = g => { const f = artFor(g); return f ? `<img src="${ROOT}assets/items/${esc(f)}" alt="" draggable="false">` : `<span class="ch-x"></span>`; };
+    const sockets = g => g.sockets ? `<span class="socks">${Array.from({ length: g.sockets }, (_, i) => `<i class="${i < (g.socketed || []).length ? "on" : ""}"></i>`).join("")}</span>` : "";
+    const cell = (g, cls, style) => { const i = cards.push(g) - 1;
+      return `<button class="${cls} q-${esc(g.quality)}${g.ethereal ? " eth" : ""}${g.charm ? " is-charm" : ""}" data-i="${i}"${style ? ` style="${style}"` : ""} aria-label="${esc(g.name)}">${pic(g)}${sockets(g)}${g.quantity ? `<span class="qty">${g.quantity}</span>` : ""}</button>`; };
+    const slotHtml = (g, area, extra = "") => g ? cell(g, `gs a-${area}${extra}`, "") :
+      `<div class="gs vacant a-${area}${extra}"><span>${LABEL[area.replace(/2$/, "")] || ""}</span></div>`;
+    const doll = (list, who) => { const by = {}; (list || []).forEach(g => { const a = SLOT[g.slot]; if (a) by[a] = g; });
+      const swap = by.rhand2 || by.lhand2;
+      const tabs = side => swap ? `<div class="wtabs a-t${side}"><button class="on" data-w="1">I</button><button data-w="2">II</button></div>` : "";
+      return `<div class="doll2" data-who="${who}">${tabs("r")}${tabs("l")}` +
+        ["head", "neck", "torso", "rhand", "lhand", "rring", "lring", "belt", "feet", "hands"].map(a => slotHtml(by[a], a, /hand/.test(a) ? " w1" : "")).join("") +
+        (swap ? slotHtml(by.rhand2, "rhand2", " w2") + slotHtml(by.lhand2, "lhand2", " w2") : "") + `</div>`; };
+    const invHtml = inv => { if (!inv) return ""; const [w, h] = inv.grid || [10, 8];
+      return `<div class="inv" style="--w:${w};--h:${h}">${inv.items.map(g => cell(g, "ch", `grid-column:${g.x + 1}/span ${g.w};grid-row:${g.y + 1}/span ${g.h}`)).join("")}</div>`; };
+    const gear = c => {
+      cards = [];
+      const merc = c.merc && c.merc.length, ch = c.charms || { items: [], totals: [] };
+      const side = `<div class="gearside">
+          <div class="ctot"><div class="ctot-h">Charms <small>${ch.items.length}</small></div>${ch.items.length ? `<ul>${(ch.totals || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="muted">No charms in the inventory.</p>`}
+          ${ch.items.length ? `<button class="hl" data-hl="is-charm" aria-pressed="false">Highlight charms</button>` : ""}</div>
+          <p class="build-note">Hover or tap an item for its properties. Set bonuses from other pieces aren't counted.</p></div>`;
+      return `<div class="mercg gear"><div class="gtabs"><button class="on" data-who="me">Player</button>${merc ? `<button data-who="merc">Mercenary</button>` : ""}</div>
+        <div class="gwrap"><div class="gpanel">
+          <div class="gview" data-who="me">${doll(c.gear, "me")}${invHtml(c.inventory)}</div>
+          ${merc ? `<div class="gview" data-who="merc" hidden>${doll(c.merc, "merc")}</div>` : ""}
+        </div>${side}</div><div class="ctip" hidden></div></div>`;
     };
     const draw = async () => {
       const raw = decodeURIComponent(location.hash.slice(1)), live = raw.endsWith("?live"), name = raw.replace(/\?live$/, "");
@@ -243,21 +271,18 @@
       sheet.innerHTML = `<div class="empty">Loading ${esc(name)}...</div>`;
       let c; try { c = await get("/public/character/" + encodeURIComponent(name) + (live ? "?live=true" : "")); } catch (e) { sheet.innerHTML = `<div class="empty">${esc(name)} couldn't be loaded (${esc(e.message)}).</div>`; return; }
       document.title = `${c.name} - level ${c.level} ${c.class} | Heyday league`;
-      const by = {}; (c.gear || []).forEach(g => { const a = SLOT[g.slot]; if (a) by[a] = g; });
       const a = c.attributes || {};
       sheet.innerHTML = `<div class="sheet-head"><h1>${esc(c.name)}</h1>${c.verified ? '<span class="badge-ok">Checked by the league</span>' : '<span class="badge-wait">Live - not checked yet</span>'}</div>
         <p class="lead">Level ${c.level}${c.paragon ? ` · Paragon ${fmt(c.paragon)}` : ""} ${esc(c.class)}${c.hardcore ? " · Hardcore" : ""} · played by ${esc(c.player)}</p>
         <div class="attrs"><div>Strength<b>${a.strength ?? "-"}</b></div><div>Dexterity<b>${a.dexterity ?? "-"}</b></div><div>Vitality<b>${a.vitality ?? "-"}</b></div><div>Energy<b>${a.energy ?? "-"}</b></div>
         <div>Life<b>${fmt(c.life)}</b></div><div>Mana<b>${fmt(c.mana)}</b></div><div>Experience<b>${fmt(c.experience)}</b></div></div>
-        <div class="doll">${Object.keys(LABEL).map(ar => box(by[ar], ar)).join("")}</div>
-        ${(c.gear || []).some(g => /swap/.test(g.slot)) ? `<div class="mercg"><h2>Weapon swap</h2><div class="row">${c.gear.filter(g => /swap/.test(g.slot)).map(g => box(g, "")).join("")}</div></div>` : ""}
-        ${c.merc && c.merc.length ? `<div class="mercg"><h2>Mercenary</h2><div class="row">${c.merc.map(g => box(g, "")).join("")}</div></div>` : ""}
-        ${build(c)}${charms(c)}`;
-      wireCharms(c);
+        ${gear(c)}
+        ${build(c)}`;
+      wireGear();
     };
     // ---- skill build and charms (2026-11-13, a player: "Can you show people's skill builds / charms on the ladder"; the
     // user: "it would have to look clean and like the game"). Trees on the game's own 6 x 3 layout (skilldesc rows and
-    // columns), charms on the inventory grid where they sit, with the game's art (assets/items/charms.json) and tooltips.
+    // columns), charms with the gear above.
     const build = c => {
       const s = c.skills; if (!s || !s.trees) return "";
       const tree = t => {
@@ -270,40 +295,38 @@
       return `<div class="mercg"><h2>Skills</h2><p class="build-note">${fmt(s.spent)} points spent${s.unspent ? ` · ${fmt(s.unspent)} unspent` : ""} ·
         points the player put in (+skills from gear not counted)</p><div class="trees">${s.trees.map(tree).join("")}</div>${other}</div>`;
     };
-    let art = null;
-    const artFor = g => { if (!art) return ""; const u = art.uniques || {}, n = g.name || "";
-      return u[n] || u[n.replace(/\s*\(.*?\)\s*$/, "")] || (art.codes || {})[g.code] || ""; };
-    const charms = c => {
-      const ch = c.charms; if (!ch) return "";
-      const [w, h] = ch.grid || [10, 8];
-      if (!ch.items.length) return `<div class="mercg"><h2>Charms</h2><div class="empty">No charms in the inventory.</div></div>`;
-      const cells = ch.items.map((g, i) => { const f = artFor(g);
-        return `<button class="ch q-${esc(g.quality)}" data-i="${i}" style="grid-column:${g.x + 1}/span ${g.w};grid-row:${g.y + 1}/span ${g.h}" aria-label="${esc(g.name)}">${f ? `<img src="${ROOT}assets/items/${esc(f)}" alt="">` : `<span class="ch-x"></span>`}</button>`; }).join("");
-      return `<div class="mercg"><h2>Charms <small class="muted">${ch.items.length}</small></h2><div class="charms">
-        <div class="inv" style="--w:${w};--h:${h}">${cells}</div>
-        <div class="ctot"><div class="ctot-h">All charms together</div><ul>${(ch.totals || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul></div></div>
-        <div class="ctip" hidden></div></div>`;
-    };
-    const tipHtml = g => `<div class="nm">${esc(g.name)}</div>${g.name !== g.base ? `<div class="bs">${esc(g.base)}</div>` : ""}<ul>${(g.lines || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul>`;
-    const wireCharms = c => {
-      const tip = $(".ctip", sheet), inv = $(".inv", sheet); if (!tip || !inv) return;
-      const items = c.charms.items;
-      const show = b => { const g = items[+b.dataset.i]; tip.className = `ctip q-${g.quality}`; tip.innerHTML = tipHtml(g); tip.hidden = false;
-        const r = b.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth;
-        let x = r.left + r.width / 2 - t.width / 2, y = r.top - t.height - 8;
-        if (y < 8) y = r.bottom + 8;
-        tip.style.left = Math.max(8, Math.min(x, vw - t.width - 8)) + "px"; tip.style.top = y + "px";
-        $$(".ch.sel", inv).forEach(x => x.classList.remove("sel")); b.classList.add("sel"); };
-      const hide = () => { tip.hidden = true; $$(".ch.sel", inv).forEach(x => x.classList.remove("sel")); };
-      $$(".ch", inv).forEach(b => { b.addEventListener("mouseenter", () => show(b)); b.addEventListener("focus", () => show(b));
+    const tipHtml = g => { const meta = [g.defense ? `Defense: ${fmt(g.defense)}` : "", g.quantity ? `Quantity: ${g.quantity}` : ""].filter(Boolean);
+      return `<div class="nm">${esc(g.name)}</div>${g.name !== g.base ? `<div class="bs">${esc(g.base)}</div>` : ""}${meta.map(m => `<div class="w">${esc(m)}</div>`).join("")}
+        <ul>${(g.lines || []).map(l => `<li>${esc(l)}</li>`).join("")}</ul>${g.ethereal || g.sockets ? `<div class="p2">${[g.ethereal ? "Ethereal (Cannot be Repaired)" : "", g.sockets ? `Socketed (${(g.socketed || []).length}/${g.sockets})` : ""].filter(Boolean).join(", ")}</div>` : ""}
+        ${g.socketed && g.socketed.length ? `<div class="sk2">${g.socketed.map(esc).join(" · ")}</div>` : ""}<div class="ql">${esc(QN[g.quality] || g.quality || "")}${g.ilvl ? ` · item level ${g.ilvl}` : ""}</div>`; };
+    const wireGear = () => {
+      const tip = $(".ctip", sheet); if (!tip) return;
+      const show = b => { const g = cards[+b.dataset.i]; if (!g) return; tip.className = `ctip q-${g.quality}`; tip.innerHTML = tipHtml(g); tip.hidden = false;
+        const r = b.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+        let x = r.right + 10, y = r.top + r.height / 2 - t.height / 2;
+        if (x + t.width > vw - 8) x = r.left - t.width - 10;
+        if (x < 8) { x = Math.max(8, Math.min(r.left + r.width / 2 - t.width / 2, vw - t.width - 8)); y = r.top - t.height - 8; if (y < 8) y = r.bottom + 8; }
+        tip.style.left = x + "px"; tip.style.top = Math.max(8, Math.min(y, vh - t.height - 8)) + "px";
+        $$("[data-i].sel", sheet).forEach(x => x.classList.remove("sel")); b.classList.add("sel"); };
+      const hide = () => { tip.hidden = true; $$("[data-i].sel", sheet).forEach(x => x.classList.remove("sel")); };
+      $$("button[data-i]", sheet).forEach(b => { b.addEventListener("mouseenter", () => show(b)); b.addEventListener("focus", () => show(b));
         b.addEventListener("click", e => { e.stopPropagation(); show(b); }); b.addEventListener("mouseleave", hide); b.addEventListener("blur", hide); });
+      $$(".gtabs button", sheet).forEach(b => b.addEventListener("click", () => {
+        $$(".gtabs button", sheet).forEach(x => x.classList.toggle("on", x === b));
+        $$(".gview", sheet).forEach(v => v.hidden = v.dataset.who !== b.dataset.who);
+        const sd = $(".gearside", sheet); if (sd) sd.hidden = b.dataset.who !== "me"; hide(); }));   // the charms are the player's
+      $$(".wtabs button", sheet).forEach(b => b.addEventListener("click", () => {
+        const d = b.closest(".doll2"); d.classList.toggle("swap", b.dataset.w === "2");
+        $$(".wtabs button", d).forEach(x => x.classList.toggle("on", x.dataset.w === b.dataset.w)); hide(); }));
+      $$(".hl", sheet).forEach(b => b.addEventListener("click", () => { const on = b.getAttribute("aria-pressed") !== "true";
+        b.setAttribute("aria-pressed", on); $(".gpanel", sheet).classList.toggle("hl-" + b.dataset.hl, on); }));
       if (!sheet.dataset.tipWired) { sheet.dataset.tipWired = 1;   // once per page: draw() runs again on every hash change
-        const off = () => { const t = $(".ctip", sheet); if (t) t.hidden = true; $$(".ch.sel", sheet).forEach(x => x.classList.remove("sel")); };
+        const off = () => { const t = $(".ctip", sheet); if (t) t.hidden = true; $$("[data-i].sel", sheet).forEach(x => x.classList.remove("sel")); };
         document.addEventListener("click", off); window.addEventListener("scroll", off, { passive: true }); }
-      if (!art) fetch(`${ROOT}assets/items/charms.json`).then(r => r.ok ? r.json() : null).then(a => {
-        if (!a) return; art = a;
-        $$(".ch", inv).forEach(b => { const f = artFor(items[+b.dataset.i]); if (f) b.innerHTML = `<img src="${ROOT}assets/items/${esc(f)}" alt="">`; });
-      }).catch(() => {});
+      const paint = () => $$("button[data-i]", sheet).forEach(b => { const x = $(".ch-x", b), f = artFor(cards[+b.dataset.i]);
+        if (f && x) x.outerHTML = `<img src="${ROOT}assets/items/${esc(f)}" alt="" draggable="false">`; });
+      if (art) return;
+      fetch(`${ROOT}assets/items/art.json`).then(r => r.ok ? r.json() : null).then(a => { if (a) { art = a; paint(); } }).catch(() => {});
     };
     draw(); window.addEventListener("hashchange", draw);
   }

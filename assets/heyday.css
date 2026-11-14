@@ -232,15 +232,6 @@ table.t b.pg { color: var(--unique); font-weight: 700; }
 .attrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 18px 0 24px; }
 .attrs div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--muted); font-size: 13px; }
 .attrs b { display: block; color: var(--text); font: 700 20px var(--display); }
-.doll { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-areas: "rhand head lhand" "rhand torso lhand" "rring neck lring" "hands belt feet"; }
-.slot { background: #060606; border: 1px solid var(--line-2); border-radius: 6px; padding: 10px 12px; text-align: center; min-width: 0; font-size: 14px; line-height: 1.4; }
-.slot .sl { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; }
-.slot .nm { font: 700 15px var(--display); overflow-wrap: anywhere; }
-.slot .bs { color: var(--base); font-size: 13px; }
-.slot ul { list-style: none; margin: 6px 0 0; padding: 0; }
-.slot li { color: var(--magic); overflow-wrap: anywhere; }
-.slot .empty-slot { color: var(--dim); padding: 10px 0; }
 .mercg { margin-top: 26px; }
 .mercg .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
 /* skill trees and charms, drawn like the game's panels: dark stone, bronze frames, gold numbers */
@@ -262,18 +253,60 @@ table.t b.pg { color: var(--unique); font-weight: 700; }
 .sk-p { position: absolute; right: -10px; bottom: -6px; min-width: 20px; padding: 0 3px; text-align: center; background: #000; border: 1px solid #4a3c2a; border-radius: 2px;
   font: 700 12px/16px var(--display); color: var(--dim); }
 .sk.on .sk-p { color: var(--unique); border-color: #8a6d3e; }
-.charms { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 18px; align-items: start; }
+/* gear: the game's inventory panel - paper doll on a 10-cell grid (the inventory's own cell), inventory under it */
+.gear { --c: clamp(29px, calc((100vw - 64px) / 10), 46px); }
+.gtabs { display: inline-flex; gap: 2px; padding: 3px; margin-bottom: 12px; background: #070605; border: 1px solid #3a2f22; border-radius: 999px; }
+.gtabs button, .hl { all: unset; cursor: pointer; padding: 6px 16px; border-radius: 999px; font: 700 13px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--base); }
+.gtabs button.on { background: #2a2219; color: var(--unique); box-shadow: inset 0 0 0 1px #6b5532; }
+.gtabs button:focus-visible, .hl:focus-visible, .wtabs button:focus-visible { outline: 2px solid var(--unique); outline-offset: 2px; }
+.gwrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 22px; align-items: start; }
+.gpanel { padding: 14px; background: linear-gradient(180deg, #1b1712, #0c0a08); border: 1px solid #5a4a33; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 4px #15110d, inset 0 0 0 5px #3a2f22, inset 0 0 40px rgba(0,0,0,.8); }
+.gview[hidden] { display: none; }
+.doll2 { display: grid; grid-template-columns: repeat(10, var(--c)); grid-template-rows: calc(var(--c) * .5) repeat(6, var(--c)); margin-bottom: 14px; }
+.gs { all: unset; box-sizing: border-box; position: relative; display: flex; align-items: center; justify-content: center; margin: 2px; cursor: pointer;
+  background: radial-gradient(circle at 50% 40%, #16120e, #070605); border: 1px solid #4a3c2a; border-radius: 2px; box-shadow: inset 0 0 0 1px #000; }
+.gs.vacant { cursor: default; } .gs.vacant span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #4a4036; text-align: center; }
+.a-head { grid-area: 2 / 5 / 4 / 7; } .a-neck { grid-area: 3 / 7 / 4 / 8; } .a-torso { grid-area: 4 / 5 / 7 / 7; } .a-belt { grid-area: 7 / 5 / 8 / 7; }
+.a-rhand, .a-rhand2 { grid-area: 2 / 1 / 6 / 3; } .a-lhand, .a-lhand2 { grid-area: 2 / 9 / 6 / 11; }
+.a-hands { grid-area: 6 / 1 / 8 / 3; } .a-feet { grid-area: 6 / 9 / 8 / 11; } .a-rring { grid-area: 7 / 4 / 8 / 5; } .a-lring { grid-area: 7 / 7 / 8 / 8; }
+.a-tr { grid-area: 1 / 1 / 2 / 3; } .a-tl { grid-area: 1 / 9 / 2 / 11; }
+.doll2 .w2, .doll2.swap .w1 { display: none; } .doll2.swap .w2 { display: flex; }
+.wtabs { display: flex; margin: 0 2px; gap: 2px; }
+.wtabs button { all: unset; flex: 1; cursor: pointer; text-align: center; font: 700 12px/1 var(--display); padding-top: 4px; color: var(--dim); background: #0b0907; border: 1px solid #2c241b; border-bottom: 0; }
+.wtabs button.on { color: #9fd0ff; background: #12202c; border-color: #2c4a63; }
+.gs img, .ch img { max-width: 88%; max-height: 88%; object-fit: contain; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.8)); }
+.eth img { opacity: .6; }
+.socks { position: absolute; left: 0; right: 0; bottom: 3px; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; padding: 0 3px; pointer-events: none; }
+.socks i { width: 9px; height: 9px; border-radius: 50%; background: #000; box-shadow: inset 0 0 0 1px #6a5a44; }
+.socks i.on { background: radial-gradient(circle at 40% 35%, #d9cdb4, #6d5f48); }
+.qty { position: absolute; right: 3px; bottom: 1px; font: 700 11px var(--display); color: var(--white); text-shadow: 0 0 3px #000, 0 0 2px #000; pointer-events: none; }
 .inv { display: grid; grid-template-columns: repeat(var(--w), 1fr); grid-template-rows: repeat(var(--h), 1fr); aspect-ratio: var(--w) / var(--h);
   border: 1px solid #4a3c2a; outline: 1px solid #000; border-radius: 2px; background-color: #050403;
   background-image: linear-gradient(to right, #221c15 1px, transparent 1px), linear-gradient(to bottom, #221c15 1px, transparent 1px);
   background-size: calc(100% / var(--w)) calc(100% / var(--h)); }
-.ch { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin: 1px; cursor: pointer; border-radius: 2px;
+.gpanel .inv { width: calc(var(--c) * var(--w)); }
+/* quality: tinted cells like the game's highlighted items */
+.gs.q-unique, .ch.q-unique, .gs.q-runeword, .ch.q-runeword { background: radial-gradient(circle at 50% 45%, rgba(199,183,144,.30), rgba(199,183,144,.07)); border-color: rgba(199,183,144,.55); }
+.gs.q-set, .ch.q-set { background: radial-gradient(circle at 50% 45%, rgba(0,196,0,.24), rgba(0,196,0,.05)); border-color: rgba(0,196,0,.45); }
+.gs.q-rare, .ch.q-rare { background: radial-gradient(circle at 50% 45%, rgba(255,255,100,.2), rgba(255,255,100,.04)); border-color: rgba(255,255,100,.38); }
+.gs.q-crafted, .ch.q-crafted { background: radial-gradient(circle at 50% 45%, rgba(255,168,0,.14), rgba(255,168,0,.02)); border-color: rgba(255,168,0,.4); }
+.gs.q-magic { background: radial-gradient(circle at 50% 45%, rgba(99,119,239,.26), rgba(99,119,239,.05)); border-color: rgba(99,119,239,.5); }
+.gs:not(.vacant):hover, .gs:focus-visible, .gs.sel { border-color: var(--text); box-shadow: inset 0 0 0 1px #000, 0 0 10px rgba(199,183,144,.35); }
+.gpanel.hl-is-charm .ch:not(.is-charm) { opacity: .25; filter: grayscale(1); }
+.gpanel.hl-is-charm .ch.is-charm { box-shadow: 0 0 0 1px var(--unique), 0 0 8px rgba(199,183,144,.5); z-index: 1; }
+.gearside { min-width: 0; } .gearside[hidden] { display: none; }
+.gearside .ctot ul { columns: 2 230px; column-gap: 18px; } .gearside .ctot li { break-inside: avoid; }
+.hl { display: inline-block; margin-top: 10px; border: 1px solid #4a3c2a; padding: 5px 14px; font-size: 12px; }
+.hl[aria-pressed="true"] { background: #2a2219; color: var(--unique); border-color: #8a6d3e; }
+.ctot-h small { color: var(--text); font-size: 13px; margin-left: 4px; }
+.ctip .w { color: var(--white); } .ctip .p2 { color: var(--base); margin-top: 4px; } .ctip .sk2 { color: var(--base); font-size: 13px; }
+.ctip .ql { color: var(--dim); font-size: 12px; margin-top: 6px; }
+.ctip.q-rare .nm { color: var(--rare); } .ctip.q-crafted .nm { color: var(--crafted); } .ctip.q-runeword .nm { color: var(--unique); } .ctip.q-superior .nm { color: var(--white); }
+.ch { all: unset; position: relative; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin: 1px; cursor: pointer; border-radius: 2px;
   background: rgba(99,119,239,.10); border: 1px solid rgba(99,119,239,.35); }
-.ch.q-unique { background: rgba(199,183,144,.10); border-color: rgba(199,183,144,.40); }
-.ch.q-set { background: rgba(0,196,0,.08); border-color: rgba(0,196,0,.35); }
 .ch.q-normal, .ch.q-superior { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.18); }
 .ch:hover, .ch:focus-visible, .ch.sel { border-color: var(--text); background-color: rgba(255,255,255,.10); }
-.ch img { max-width: 92%; max-height: 92%; object-fit: contain; image-rendering: auto; pointer-events: none; }
 .ch-x { width: 50%; height: 50%; border-radius: 3px; background: currentColor; opacity: .3; color: var(--magic); }
 .ch.q-unique .ch-x { color: var(--unique); }
 .ctot { background: #060606; border: 1px solid var(--line-2); border-radius: 6px; padding: 12px 16px; text-align: center; font-size: 14px; line-height: 1.45; }
@@ -288,7 +321,8 @@ table.t b.pg { color: var(--unique); font-weight: 700; }
 @media (max-width: 760px) {
   .trees { grid-template-columns: 1fr; }
   .tree { max-width: 360px; width: 100%; margin: 0 auto; }
-  .charms { grid-template-columns: 1fr; }
+  .gwrap { grid-template-columns: 1fr; }
+  .gpanel { justify-self: center; padding: 10px; }
 }
 
 /* ---- prose (guide, loot, patch notes) */
@@ -421,7 +455,6 @@ table.t b.pg { color: var(--unique); font-weight: 700; }
   section.s { padding: 48px 0; }
   .s h2, .page h1 { font-size: 26px; }
   .cards { grid-template-columns: 1fr; }
-  .doll { grid-template-columns: 1fr 1fr; grid-template-areas: "head neck" "rhand lhand" "torso torso" "rring lring" "hands feet" "belt belt"; }
   .count { width: 100%; margin: 0; }
   .card.big { grid-column: auto; }
   .fcols { grid-template-columns: 1fr 1fr; }
